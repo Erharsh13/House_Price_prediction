@@ -1,14 +1,31 @@
-
-name: california-house-price-pred
-endpoint_type: online
-auth_mode: aml_token
-
-deployments:
-  - name: blue
-    model:
-      name: amlstudio-california-house-pri
-      version: 1
-    environment:
-      name: AzureMLDesigner-89
-    compute: Standard_DS3_v2
-    instance_count: 1
+trigger:
+  branches:
+    include:
+      - main  # Trigger pipeline when changes are pushed to the main branch
+ 
+pool:
+  vmImage: 'ubuntu-latest'  # The type of agent used to run the pipeline
+ 
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'  # Use Python 3.x
+    addToPath: true
+ 
+- script: |
+    pip install -r requirements.txt
+  displayName: 'Install dependencies'
+ 
+- script: |
+    pytest tests/  # Run unit tests if you have test scripts
+  displayName: 'Run Unit Tests'
+ 
+- script: |
+    cp endpoint_deployment.yml $(Build.ArtifactStagingDirectory)/  # Copy deployment YAML to staging directory
+  displayName: 'Prepare Deployment YAML'
+ 
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/'  # Publish the deployment YAML as an artifact
+    artifactName: 'deployment-artifacts'
+    publishLocation: 'pipeline'    
