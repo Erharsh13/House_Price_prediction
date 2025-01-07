@@ -1,0 +1,14 @@
+
+name: california-house-price-pred
+endpoint_type: online
+auth_mode: aml_token
+
+deployments:
+  - name: blue
+    model:
+      name: amlstudio-california-house-pri
+      version: 1
+    environment:
+      name: AzureMLDesigner-89
+    compute: Standard_DS3_v2
+    instance_count: 1
